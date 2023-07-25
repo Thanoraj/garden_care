@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>531024348800-1q7lrqdsnhisvpsih5bug97lv19n61kl.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.531024348800-1q7lrqdsnhisvpsih5bug97lv19n61kl</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAbrDoZWoXIcVk5YLizDSjGEvYcYS82BOY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>531024348800</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.gardencare.gardenCare</string>
+	<key>PROJECT_ID</key>
+	<string>garden-care-8fea8</string>
+	<key>STORAGE_BUCKET</key>
+	<string>garden-care-8fea8.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:531024348800:ios:8ac4e0743e43e6eedb0865</string>
+	<key>DATABASE_URL</key>
+	<string>https://garden-care-8fea8-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>
