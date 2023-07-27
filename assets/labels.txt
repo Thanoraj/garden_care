@@ -1,0 +1,3 @@
+0 Black rot
+1 Bacterial Spot
+2 Healthy

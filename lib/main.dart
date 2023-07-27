@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:garden_care/image_adder.dart';
 
 import 'firebase_options.dart';
 
@@ -64,7 +67,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startListening() {
-    _databaseRef.onValue.listen((event) {
+    print("in");
+    _databaseRef.onValue.listen((event) async {
       var dataSnapshot = event.snapshot;
       print(dataSnapshot.value);
       if (dataSnapshot.value != null) {
@@ -73,14 +77,72 @@ class _HomePageState extends State<HomePage> {
         print(value);
         try {
           _sensorData = SensorData(temperature: value[0]??"0", humidity: value[1]??"0", phLevel: value[3]??'0', soilMoisture: value[2]??'0', light: value[4]??'0');
-        } on Exception catch (e) {
+          print(int.parse(_sensorData!.soilMoisture));
+          if (double.parse(_sensorData!.phLevel)< 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
+            await addFertilizer(data);
+          } else if (double.parse(_sensorData!.phLevel) >= 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
+            await passWater(data);
+          } else if (data['passed'] == true && int.parse(_sensorData!.soilMoisture) >= 10) {
+            print("motor state changed");
+            await FirebaseDatabase.instance.ref().update({"passed":false});
+          }
+          } on Exception catch (e) {
           print(e);
         }
         setState(() {
         });
       }
-    });
+    }).onError((e){print(e);});
+    print("object");
 
+  }
+
+  passWater (data) async {
+      print("motor started");
+      await FirebaseDatabase.instance.ref().update({"passed":true});
+      await FirebaseDatabase.instance.ref().update({"speed1":1});
+      await FirebaseDatabase.instance.ref().update({"speed2":1});
+      int i = 0;
+      Timer timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
+        print("motor stopped");
+        await FirebaseDatabase.instance.ref().update({"speed1":0});
+        await FirebaseDatabase.instance.ref().update({"speed2":0});
+        if (i == 1) {
+          print(i);
+          timer.cancel();
+        }
+        i++;
+      });
+  }
+
+  addFertilizer (data) async {
+      print("motor started");
+      await FirebaseDatabase.instance.ref().update({"passed":true});
+      await FirebaseDatabase.instance.ref().update({"speed3":1});
+      int i = 0;
+      Timer timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
+        print("fertilizer added");
+        print("motor started");
+        await FirebaseDatabase.instance.ref().update({"speed1":1});
+        await FirebaseDatabase.instance.ref().update({"speed2":1});
+        await FirebaseDatabase.instance.ref().update({"speed3":0});
+        int j = 0;
+        Timer timer2 = Timer.periodic(const Duration(minutes: 1), (timer2) async {
+          print("motor stopped");
+          await FirebaseDatabase.instance.ref().update({"speed1":0});
+          await FirebaseDatabase.instance.ref().update({"speed2":0});
+          if (j == 1) {
+            print(i);
+            timer2.cancel();
+          }
+          j++;
+        });
+        if (i == 1) {
+          print(i);
+          timer.cancel();
+        }
+        i++;
+      });
   }
 
 
@@ -260,6 +322,30 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ):const Center(
                         child: Text("Loading..."),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30,),
+                 Center(
+                  child: GestureDetector(
+                    onTap: () {
+Navigator.push(context, MaterialPageRoute(builder: (context)=> const ImageAdder()));
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 20,),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.energy_savings_leaf_sharp),
+                            SizedBox(width: 10,),
+                            Text("Analyse leaf disease"),
+                          ],
+                        ),
                       ),
                     ),
                   ),

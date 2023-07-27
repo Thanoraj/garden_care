@@ -1,3 +1,0 @@
-0 Healthy leaf
-1 Rot
-2 Rust
