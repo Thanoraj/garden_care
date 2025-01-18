@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:garden_care/chart.dart';
 import 'package:garden_care/image_adder.dart';
 
 import 'firebase_options.dart';
@@ -10,16 +11,12 @@ import 'firebase_options.dart';
 class SensorData {
   final String temperature;
   final String humidity;
-  final String phLevel;
-  final String soilMoisture;
-  final String light;
+
 
   SensorData( {
     required this.temperature,
     required this.humidity,
-    required this.phLevel,
-    required this.soilMoisture,
-    required this.light,
+
 
   });
 }
@@ -76,16 +73,16 @@ class _HomePageState extends State<HomePage> {
         List value = data['sensor-data'].split(":");
         print(value);
         try {
-          _sensorData = SensorData(temperature: value[0]??"0", humidity: value[1]??"0", phLevel: value[3]??'0', soilMoisture: value[2]??'0', light: value[4]??'0');
-          print(int.parse(_sensorData!.soilMoisture));
-          if (double.parse(_sensorData!.phLevel)< 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
-            await addFertilizer(data);
-          } else if (double.parse(_sensorData!.phLevel) >= 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
-            await passWater(data);
-          } else if (data['passed'] == true && int.parse(_sensorData!.soilMoisture) >= 10) {
-            print("motor state changed");
-            await FirebaseDatabase.instance.ref().update({"passed":false});
-          }
+          _sensorData = SensorData(temperature: value[0]??"0", humidity: value[1]??"0");
+          // print(int.parse(_sensorData!.soilMoisture));
+          // if (double.parse(_sensorData!.phLevel)< 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
+          //   await addFertilizer(data);
+          // } else if (double.parse(_sensorData!.phLevel) >= 6 && int.parse(_sensorData!.soilMoisture) < 10 && data['passed'] == false) {
+          //   await passWater(data);
+          // } else if (data['passed'] == true && int.parse(_sensorData!.soilMoisture) >= 10) {
+          //   print("motor state changed");
+          //   await FirebaseDatabase.instance.ref().update({"passed":false});
+          // }
           } on Exception catch (e) {
           print(e);
         }
@@ -100,13 +97,12 @@ class _HomePageState extends State<HomePage> {
   passWater (data) async {
       print("motor started");
       await FirebaseDatabase.instance.ref().update({"passed":true});
-      await FirebaseDatabase.instance.ref().update({"speed1":1});
-      await FirebaseDatabase.instance.ref().update({"speed2":1});
+      await FirebaseDatabase.instance.ref().update({"motor-state":'1-1-0'});
       int i = 0;
       Timer timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
         print("motor stopped");
-        await FirebaseDatabase.instance.ref().update({"speed1":0});
-        await FirebaseDatabase.instance.ref().update({"speed2":0});
+        await FirebaseDatabase.instance.ref().update({"motor-state":'0-0-0'});
+
         if (i == 1) {
           print(i);
           timer.cancel();
@@ -118,19 +114,16 @@ class _HomePageState extends State<HomePage> {
   addFertilizer (data) async {
       print("motor started");
       await FirebaseDatabase.instance.ref().update({"passed":true});
-      await FirebaseDatabase.instance.ref().update({"speed3":1});
+      await FirebaseDatabase.instance.ref().update({"motor-state":'0-0-1'});
       int i = 0;
       Timer timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
         print("fertilizer added");
         print("motor started");
-        await FirebaseDatabase.instance.ref().update({"speed1":1});
-        await FirebaseDatabase.instance.ref().update({"speed2":1});
-        await FirebaseDatabase.instance.ref().update({"speed3":0});
+        await FirebaseDatabase.instance.ref().update({"motor-state":'1-1-0'});
         int j = 0;
         Timer timer2 = Timer.periodic(const Duration(minutes: 1), (timer2) async {
           print("motor stopped");
-          await FirebaseDatabase.instance.ref().update({"speed1":0});
-          await FirebaseDatabase.instance.ref().update({"speed2":0});
+          await FirebaseDatabase.instance.ref().update({"motor-state":'0-0-0'});
           if (j == 1) {
             print(i);
             timer2.cancel();
@@ -260,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
 
                                       children: [
-                                        Text('${(double.tryParse(_sensorData!.phLevel)??0)> 14? 14:(double.tryParse(_sensorData!.phLevel)??0) < 0 ? 0: (double.tryParse(_sensorData!.phLevel)??0)}',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+                                        // Text('${(double.tryParse(_sensorData!.phLevel)??0)> 14? 14:(double.tryParse(_sensorData!.phLevel)??0) < 0 ? 0: (double.tryParse(_sensorData!.phLevel)??0)}',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
                                         const Text('pH',style: TextStyle(fontSize: 14, color: Colors.black54),),
                                       ],
                                     ),
@@ -282,7 +275,7 @@ class _HomePageState extends State<HomePage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
 
                                       children: [
-                                        Text('${(double.tryParse(_sensorData!.soilMoisture)??0).toInt()}',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+                                        // Text('${(double.tryParse(_sensorData!.soilMoisture)??0).toInt()}',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
                                         const Text('Soil Moisture',style: TextStyle(fontSize: 14, color: Colors.black54),),
                                       ],
                                     ),
@@ -311,7 +304,7 @@ class _HomePageState extends State<HomePage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
 
                                     children: [
-                                      Text('${(double.tryParse(_sensorData!.light)??0).toInt()}%',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+                                      // Text('${(double.tryParse(_sensorData!.light)??0).toInt()}%',style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
                                       const Text('Sun light',style: TextStyle(fontSize: 14, color: Colors.black54),),
                                     ],
                                   ),
@@ -350,6 +343,29 @@ Navigator.push(context, MaterialPageRoute(builder: (context)=> const ImageAdder(
                     ),
                   ),
                 ),
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>  ChartPage()));
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 20,),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.energy_savings_leaf_sharp),
+                            SizedBox(width: 10,),
+                            Text("Analyse leaf disease"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -367,5 +383,4 @@ void main() async {
   );
   runApp(MyApp());
 }
-
 
